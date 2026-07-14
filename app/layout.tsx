@@ -3,6 +3,7 @@ import { Geist_Mono, Public_Sans } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
 import "./globals.css"
+import { TooltipProvider } from "@/components/ui/tooltip"
 
 const publicSans = Public_Sans({ subsets: ["latin"], variable: "--font-sans" })
 
@@ -29,7 +30,7 @@ export default function RootLayout({
     >
       <body>
         <ThemeProvider attribute="class" defaultTheme="system">
-          {children}
+          <TooltipProvider>{children}</TooltipProvider>
         </ThemeProvider>
       </body>
     </html>
