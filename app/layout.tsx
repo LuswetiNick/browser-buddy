@@ -1,9 +1,11 @@
+import { ClerkProvider } from "@clerk/nextjs"
+import { shadcn } from "@clerk/ui/themes"
 import { Geist_Mono, Public_Sans } from "next/font/google"
 
 import { ThemeProvider } from "@/components/theme-provider"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import "./globals.css"
-import { TooltipProvider } from "@/components/ui/tooltip"
 
 const publicSans = Public_Sans({ subsets: ["latin"], variable: "--font-sans" })
 
@@ -29,9 +31,11 @@ export default function RootLayout({
       )}
     >
       <body>
-        <ThemeProvider attribute="class" defaultTheme="system">
-          <TooltipProvider>{children}</TooltipProvider>
-        </ThemeProvider>
+        <ClerkProvider appearance={{ theme: shadcn }}>
+          <ThemeProvider attribute="class" defaultTheme="system">
+            <TooltipProvider>{children}</TooltipProvider>
+          </ThemeProvider>
+        </ClerkProvider>
       </body>
     </html>
   )
