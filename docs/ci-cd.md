@@ -1,6 +1,6 @@
 # CI/CD Plan
 
-BrowserBuddy uses GitHub Actions for test gates and Vercel for deployments.
+BrowserBuddy uses GitHub Actions for test gates and Vercel for deployments. CI and deployment are split into separate workflows so pull requests only show checks that matter before merge.
 
 ## Branch Flow
 
@@ -11,6 +11,8 @@ BrowserBuddy uses GitHub Actions for test gates and Vercel for deployments.
 ## Required GitHub Checks
 
 Require the `CI / Quality Gate` and `CI / Browser E2E` checks before merging into both `staging` and `master`.
+
+Do not require deployment workflow checks for pull requests. Deployment checks only run after code is merged or pushed to a deployment branch.
 
 Recommended branch protection:
 
@@ -25,7 +27,6 @@ Recommended branch protection:
 The workflow in `.github/workflows/ci.yml` runs on:
 
 - Pull requests into `staging` and `master`
-- Pushes to `staging` and `master`
 - Manual dispatch
 
 The quality gate runs:
@@ -46,9 +47,14 @@ pnpm exec playwright install --with-deps chromium
 pnpm test:e2e
 ```
 
-## CD Workflow
+## Deploy Workflow
 
-Deployment jobs run only after the CI jobs pass.
+The workflow in `.github/workflows/deploy.yml` runs on:
+
+- Pushes to `staging` and `master`
+- Manual dispatch
+
+The deploy workflow reruns the same quality and browser E2E gates before deploying. This keeps PR checks clean while still preventing deploys when tests fail.
 
 On pushes to `staging`, GitHub Actions deploys a Vercel Preview deployment:
 
@@ -115,9 +121,10 @@ Assign staging or test Clerk keys to Vercel Preview, and production Clerk keys t
 
 Recommended deployment behavior:
 
-- `staging` branch deploys to a staging/preview environment.
-- `master` branch deploys to production.
-- Production deployment should happen only after the CI workflow passes on the merge to `master`.
+- Pull requests run only the CI workflow.
+- `staging` branch deploys to a staging/preview environment after deploy workflow checks pass.
+- `master` branch deploys to production after deploy workflow checks pass.
+- Production deployment should happen only after a reviewed merge to `master`.
 
 If the Vercel Git integration is currently auto-deploying this repository, either disable automatic Vercel deployments or remove the GitHub Actions deploy jobs to avoid duplicate deployments.
 
