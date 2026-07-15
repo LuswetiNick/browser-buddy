@@ -31,7 +31,10 @@ export default function RootLayout({
       )}
     >
       <body>
-        <ClerkProvider appearance={{ theme: shadcn }}>
+        <ClerkProvider
+          appearance={{ theme: shadcn }}
+          taskUrls={{ "choose-organization": "/choose-organization" }}
+        >
           <ThemeProvider attribute="class" defaultTheme="system">
             <TooltipProvider>
               <div className="min-h-screen bg-background">{children}</div>
