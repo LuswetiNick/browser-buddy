@@ -2,8 +2,11 @@ import { SignIn } from "@clerk/nextjs"
 
 export default function SignInPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center">
+    <main
+      aria-label="Sign in"
+      className="flex min-h-[calc(100vh-4rem)] items-center justify-center"
+    >
       <SignIn />
-    </div>
+    </main>
   )
 }
