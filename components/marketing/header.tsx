@@ -10,14 +10,14 @@ const Header = () => {
         <Link href="/" className="text-sm font-semibold">
           BrowserBuddy
         </Link>
-        <nav className="flex items-center gap-2">
+        <nav aria-label="Authentication" className="flex items-center gap-2">
           <ThemeToggle />
           <Show when="signed-out">
             <SignInButton mode="modal">
               <Button variant="outline">Sign in</Button>
             </SignInButton>
             <SignUpButton mode="modal">
-              <Button variant="default">Get Started</Button>
+              <Button variant="default">Sign up</Button>
             </SignUpButton>
           </Show>
           <Show when="signed-in">

@@ -33,7 +33,9 @@ export default function RootLayout({
       <body>
         <ClerkProvider appearance={{ theme: shadcn }}>
           <ThemeProvider attribute="class" defaultTheme="system">
-            <TooltipProvider>{children}</TooltipProvider>
+            <TooltipProvider>
+              <div className="min-h-screen bg-background">{children}</div>
+            </TooltipProvider>
           </ThemeProvider>
         </ClerkProvider>
       </body>
