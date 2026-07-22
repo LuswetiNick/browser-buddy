@@ -16,11 +16,6 @@ vi.mock("@clerk/nextjs/server", () => ({
   },
 }))
 
-vi.mock("@clerk/nextjs", () => ({
-  OrganizationSwitcher: () => <div data-testid="organization-switcher" />,
-  UserButton: () => <button aria-label="Open user menu" />,
-}))
-
 vi.mock("next/navigation", () => ({
   redirect,
 }))
@@ -45,9 +40,7 @@ describe("DashboardPage", () => {
 
     render(await DashboardPage())
 
-    expect(screen.getByRole("heading")).toBeVisible()
-    expect(screen.getByRole("button", { name: "Open user menu" })).toBeVisible()
-    expect(screen.getByTestId("organization-switcher")).toBeVisible()
+    expect(screen.getByRole("heading", { name: "Dashboard" })).toBeVisible()
     expect(redirect).not.toHaveBeenCalled()
   })
 })

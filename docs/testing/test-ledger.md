@@ -92,3 +92,34 @@ Copy this section for each feature:
 - Tests updated: none
 - Verification: `pnpm test:run -- tests/components/dashboard-page.test.tsx`, `pnpm test:run`, `pnpm typecheck`, `pnpm lint`, `pnpm build`
 - Known gaps: add live authenticated E2E coverage once Clerk organization test fixtures are available
+
+### 2026-07-16 - Collapsed Sidebar Organization Switcher
+
+- Changed areas: dashboard sidebar Clerk organization switcher appearance
+- Primary risks: collapsed sidebar overflows with organization text or controls; expanded and mobile switchers are unintentionally hidden
+- Tests added:
+  - `tests/components/app-sidebar.test.tsx`
+- Tests updated: none
+- Verification: `pnpm exec vitest run tests/components/app-sidebar.test.tsx`, `pnpm typecheck`, `pnpm lint`, `pnpm build`
+- Known gaps: jsdom does not apply Tailwind responsive variants or render Clerk's live switcher DOM; verify the collapsed and mobile visuals in an authenticated browser session
+
+### 2026-07-16 - Sidebar Tooltip Trigger Composition
+
+- Changed areas: dashboard custom sidebar trigger
+- Primary risks: nested buttons produce invalid HTML and hydration errors; tooltip or sidebar trigger loses its button semantics
+- Tests added:
+  - `tests/components/custom-sidebar-trigger.test.tsx`
+- Tests updated:
+  - `tests/components/dashboard-page.test.tsx`
+- Verification: `pnpm test:run`, `pnpm typecheck`, `pnpm lint`, `pnpm build`
+- Known gaps: no authenticated browser test currently exercises the dashboard header tooltip
+
+### 2026-07-22 - Collapsible Sidebar Logo
+
+- Changed areas: shared logo component customization and dashboard sidebar header
+- Primary risks: the logo wordmark remains visible and overflows the collapsed sidebar; the remaining icon is hidden or misaligned; the expanded or mobile logo loses its wordmark
+- Tests added: none
+- Tests updated:
+  - `tests/components/app-sidebar.test.tsx`
+- Verification: `pnpm exec vitest run tests/components/app-sidebar.test.tsx`, `pnpm typecheck`, `pnpm lint`
+- Known gaps: jsdom does not apply Tailwind group-data variants; verify expanded, collapsed, and mobile logo presentation in a browser session

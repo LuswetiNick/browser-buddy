@@ -2,13 +2,14 @@ import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs"
 import Link from "next/link"
 import { Button, buttonVariants } from "../ui/button"
 import ThemeToggle from "../theme-toggle"
+import Logo from "../logo"
 
 const Header = () => {
   return (
     <header className="border-b">
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Link href="/" className="text-sm font-semibold">
-          BrowserBuddy
+        <Link href="/">
+          <Logo />
         </Link>
         <nav aria-label="Authentication" className="flex items-center gap-2">
           <ThemeToggle />
