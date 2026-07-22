@@ -16,6 +16,7 @@ const AppSidebar = () => {
       <SidebarHeader className="h-14 justify-center">
         <SidebarMenuButton
           size="lg"
+          aria-label="BrowserBuddy"
           className="group-data-[collapsible=icon]:justify-center"
         >
           <Logo wordmarkClassName="group-data-[collapsible=icon]:hidden" />

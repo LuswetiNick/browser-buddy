@@ -7,7 +7,7 @@ const AppHeader = () => {
   return (
     <header
       className={cn(
-        "pxx-4 mb-6 flex items-center justify-between gap-2 md:px-2"
+        "mb-6 flex items-center justify-between gap-2 px-4 md:px-2"
       )}
     >
       <div className="flex items-center gap-3">

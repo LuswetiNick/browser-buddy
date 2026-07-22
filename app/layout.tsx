@@ -39,7 +39,7 @@ export default function RootLayout({
           taskUrls={{ "choose-organization": "/choose-organization" }}
         >
           <ThemeProvider attribute="class" defaultTheme="system">
-            <TooltipProvider delayDuration={3000}>
+            <TooltipProvider>
               <div className="min-h-screen bg-background">{children}</div>
             </TooltipProvider>
           </ThemeProvider>

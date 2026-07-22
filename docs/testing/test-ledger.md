@@ -123,3 +123,15 @@ Copy this section for each feature:
   - `tests/components/app-sidebar.test.tsx`
 - Verification: `pnpm exec vitest run tests/components/app-sidebar.test.tsx`, `pnpm typecheck`, `pnpm lint`
 - Known gaps: jsdom does not apply Tailwind group-data variants; verify expanded, collapsed, and mobile logo presentation in a browser session
+
+### 2026-07-22 - External Store Hook Lint Fix
+
+- Changed areas: carousel navigation state, responsive mobile state, and marketing header logo assertion
+- Primary risks: carousel navigation buttons do not reflect Embla selection changes; responsive layouts do not update when crossing the mobile breakpoint; the quality gate remains blocked by synchronous effect state updates
+- Tests added:
+  - `tests/components/carousel.test.tsx`
+  - `tests/hooks/use-mobile.test.tsx`
+- Tests updated:
+  - `tests/components/auth-header.test.tsx`
+- Verification: `pnpm exec vitest run tests/components/carousel.test.tsx tests/hooks/use-mobile.test.tsx tests/components/auth-header.test.tsx`, `pnpm lint`, `pnpm typecheck`, `pnpm test:run`, `pnpm build`
+- Known gaps: carousel geometry and responsive presentation still require browser-level visual coverage when these components become feature-critical
