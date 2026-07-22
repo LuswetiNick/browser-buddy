@@ -27,7 +27,7 @@ describe("marketing Header auth controls", () => {
 
     render(<Header />)
 
-    expect(screen.getByRole("link", { name: "BrowserBuddy" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "BrowserBuddy." })).toHaveAttribute(
       "href",
       "/"
     )

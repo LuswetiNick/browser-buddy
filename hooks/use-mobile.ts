@@ -3,16 +3,16 @@ import * as React from "react"
 const MOBILE_BREAKPOINT = 768
 const MOBILE_MEDIA_QUERY = `(max-width: ${MOBILE_BREAKPOINT - 1}px)`
 
-function subscribe(callback: () => void) {
-  const mql = window.matchMedia(MOBILE_MEDIA_QUERY)
+function subscribe(onStoreChange: () => void) {
+  const mediaQuery = window.matchMedia(MOBILE_MEDIA_QUERY)
 
-  mql.addEventListener("change", callback)
+  mediaQuery.addEventListener("change", onStoreChange)
 
-  return () => mql.removeEventListener("change", callback)
+  return () => mediaQuery.removeEventListener("change", onStoreChange)
 }
 
 function getSnapshot() {
-  return window.innerWidth < MOBILE_BREAKPOINT
+  return window.matchMedia(MOBILE_MEDIA_QUERY).matches
 }
 
 function getServerSnapshot() {
