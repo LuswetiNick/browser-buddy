@@ -78,6 +78,8 @@ Add these repository secrets in GitHub for CI builds and tests:
 
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
 - `CLERK_SECRET_KEY`
+- `DATABASE_URL`
+- `DATABASE_URL_UNPOOLED`
 
 Optional for future authenticated E2E tests:
 
@@ -114,6 +116,8 @@ Set application runtime variables in the Vercel dashboard under Project Settings
 
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
 - `CLERK_SECRET_KEY`
+- `DATABASE_URL`
+- `DATABASE_URL_UNPOOLED`
 
 Assign staging or test Clerk keys to Vercel Preview, and production Clerk keys to Vercel Production. The GitHub deploy jobs run `vercel pull`, so Vercel provides those application variables to `vercel build`.
 
