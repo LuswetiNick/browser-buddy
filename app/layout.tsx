@@ -1,11 +1,16 @@
-import { Geist_Mono, Public_Sans } from "next/font/google"
+import { ClerkProvider } from "@clerk/nextjs"
+import { shadcn } from "@clerk/ui/themes"
+import { Geist_Mono, IBM_Plex_Sans } from "next/font/google"
 
 import { ThemeProvider } from "@/components/theme-provider"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import "./globals.css"
-import { TooltipProvider } from "@/components/ui/tooltip"
 
-const publicSans = Public_Sans({ subsets: ["latin"], variable: "--font-sans" })
+const ibmPlexSans = IBM_Plex_Sans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+})
 
 const fontMono = Geist_Mono({
   subsets: ["latin"],
@@ -25,13 +30,20 @@ export default function RootLayout({
         "antialiased",
         fontMono.variable,
         "font-sans",
-        publicSans.variable
+        ibmPlexSans.variable
       )}
     >
       <body>
-        <ThemeProvider attribute="class" defaultTheme="system">
-          <TooltipProvider>{children}</TooltipProvider>
-        </ThemeProvider>
+        <ClerkProvider
+          appearance={{ theme: shadcn }}
+          taskUrls={{ "choose-organization": "/choose-organization" }}
+        >
+          <ThemeProvider attribute="class" defaultTheme="system">
+            <TooltipProvider>
+              <div className="min-h-screen bg-background">{children}</div>
+            </TooltipProvider>
+          </ThemeProvider>
+        </ClerkProvider>
       </body>
     </html>
   )
