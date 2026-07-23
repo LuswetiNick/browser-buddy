@@ -4,14 +4,14 @@ This file tracks feature-to-test coverage. Update it whenever a feature changes 
 
 ## Current Baseline
 
-| Area             | Status                 | Notes                                                                       |
-| ---------------- | ---------------------- | --------------------------------------------------------------------------- |
-| Authentication   | Implemented and tested | Clerk is installed and wired into the app. Auth smoke coverage now exists.  |
-| Workflow builder | Not implemented        | Add graph and editor tests with the first workflow feature.                 |
-| AI execution     | Not implemented        | Use mocked provider responses when added.                                   |
-| Persistence      | Foundation implemented | Neon and Drizzle are configured; add repository tests with the first table. |
-| Authorization    | Partial                | Clerk exists; app-level ownership and permissions are not implemented yet.  |
-| Test tooling     | Implemented            | Vitest, React Testing Library, Playwright, Clerk testing, and MSW exist.    |
+| Area             | Status                 | Notes                                                                        |
+| ---------------- | ---------------------- | ---------------------------------------------------------------------------- |
+| Authentication   | Implemented and tested | Clerk is installed and wired into the app. Auth smoke coverage now exists.   |
+| Workflow builder | Not implemented        | Add graph and editor tests with the first workflow feature.                  |
+| AI execution     | Not implemented        | Use mocked provider responses when added.                                    |
+| Persistence      | Schema implemented     | Neon, Drizzle, the workflow schema, and versioned migrations are configured. |
+| Authorization    | Partial                | Clerk exists; app-level ownership and permissions are not implemented yet.   |
+| Test tooling     | Implemented            | Vitest, React Testing Library, Playwright, Clerk testing, and MSW exist.     |
 
 ## Feature Records
 
@@ -144,4 +144,32 @@ Copy this section for each feature:
   - `tests/db/env.test.ts`
 - Tests updated: none
 - Verification: `pnpm exec vitest run tests/db/env.test.ts`, `pnpm db:generate`, `pnpm typecheck`, `pnpm lint`, `pnpm test:run`, `pnpm build`, direct `SELECT 1` through the configured PostgreSQL pool
-- Known gaps: no tables or repositories exist yet, so database integration tests and a committed migration should be added with the first persistence feature
+- Known gaps: no workflow repository exists yet, so database integration tests should be added with the first persistence service
+
+### 2026-07-23 - Drizzle CLI Connection Timeout
+
+- Changed areas: `db:push` and `db:migrate` package scripts
+- Primary risks: Node's default network-family attempt timeout expires before the Neon TCP connection completes; local migration behavior differs from the deployment workflow
+- Tests added: none
+- Tests updated: none
+- Verification: `pnpm db:push --explain`, `npm run db:migrate -- --help`, package-script assertion, `node_modules/.bin/vitest run tests/db/env.test.ts`
+- Known gaps: `db:studio` still uses Node's default network-family attempt timeout
+
+### 2026-07-23 - Production Database Migration Pipeline
+
+- Changed areas: secure migration URL validation, server-only database boundary, staging and production deployment workflow, CI/CD documentation, initial workflow migration
+- Primary risks: production credentials exposed outside the migration step, pooled connections used for DDL, migrations interrupted by newer deploys, application deployment continuing after a failed migration, initial migration colliding with a table previously created by `db:push`
+- Tests added: none
+- Tests updated:
+  - `tests/db/env.test.ts`
+- Verification: `pnpm exec vitest run tests/db/env.test.ts`, `pnpm db:generate`, `drizzle-kit check`, `pnpm db:push --explain`, workflow YAML validation, `pnpm typecheck`, `pnpm lint`, `pnpm test:run`, `pnpm build`
+- Known gaps: database repository integration tests will be added with the first workflow persistence service; production environment approval and secret configuration must be completed in GitHub
+
+### 2026-07-23 - Deployment Environment Alignment
+
+- Changed areas: deployment workflow environment mapping, local database variable guidance, and CI/CD secret scoping documentation
+- Primary risks: staging deploys cannot access Preview-scoped migration secrets; production deploys bypass Production protection rules because of a case-mismatched environment name; direct migration credentials are unnecessarily exposed to the application runtime
+- Tests added: none
+- Tests updated: none
+- Verification: workflow YAML validation, Prettier, `git diff --check`, `node_modules/.bin/vitest run`
+- Known gaps: `Preview` and `Production` environment secrets and deployment branch policies must be configured in GitHub
