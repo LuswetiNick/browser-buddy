@@ -1,16 +1,16 @@
 import "server-only"
 
-import { attachDatabasePool } from "@vercel/functions"
-import { drizzle } from "drizzle-orm/node-postgres"
-import { Pool } from "pg"
+import { neon } from "@neondatabase/serverless"
+import { drizzle } from "drizzle-orm/neon-http"
 
 import { requireDatabaseUrl } from "@/db/env"
 
-const pool = new Pool({
-  connectionString: requireDatabaseUrl(),
-  max: 5,
+import * as schema from "./schema"
+
+const sql = neon(requireDatabaseUrl())
+
+export const db = drizzle({
+  client: sql,
 })
 
-attachDatabasePool(pool)
-
-export const db = drizzle({ client: pool })
+export { schema }

@@ -56,21 +56,66 @@ The workflow in `.github/workflows/deploy.yml` runs on:
 
 The deploy workflow reruns the same quality and browser E2E gates before deploying. This keeps PR checks clean while still preventing deploys when tests fail.
 
-On pushes to `staging`, GitHub Actions deploys a Vercel Preview deployment:
+On pushes to `staging`, GitHub Actions builds a Vercel Preview deployment,
+applies committed migrations to the staging database, and then deploys:
 
 ```bash
 vercel pull --yes --environment=preview
 vercel build
+pnpm db:migrate
 vercel deploy --prebuilt
 ```
 
-On pushes to `master`, GitHub Actions deploys a Vercel Production deployment:
+On pushes to `master`, GitHub Actions builds a Vercel Production deployment,
+applies committed migrations to the production database, and then deploys:
 
 ```bash
 vercel pull --yes --environment=production
 vercel build --prod
+pnpm db:migrate
 vercel deploy --prebuilt --prod
 ```
+
+Deployment workflow runs are serialized per branch and are not canceled in
+progress, preventing a newer push from interrupting a database migration.
+
+## Database Migration Policy
+
+- Define schema changes in `db/schema.ts`.
+- Run `pnpm db:generate` locally and commit the generated `db/migrations`
+  files.
+- The initial workflow migration uses `CREATE TABLE IF NOT EXISTS` to adopt
+  environments where the matching table was previously created with
+  `db:push`. Subsequent migrations should remain explicit so unexpected schema
+  drift fails visibly.
+- Use `pnpm db:push` only for local prototyping. Production and staging use
+  the committed migration history through `pnpm db:migrate`.
+- Use a direct, unpooled Neon connection for migrations. The migration
+  configuration enforces `sslmode=verify-full` and
+  `channel_binding=require`.
+- Keep migrations backward compatible with the currently deployed
+  application whenever possible because the database is migrated immediately
+  before the new Vercel artifacts are deployed.
+
+## Local Database Variables
+
+Keep both local database URLs in `.env.local`, which is excluded from Git:
+
+```dotenv
+DATABASE_URL="<runtime URL for the development Neon branch>"
+DATABASE_URL_UNPOOLED="<direct URL for the same development Neon branch>"
+```
+
+Both URLs must target the same Neon branch, database, and role.
+`DATABASE_URL_UNPOOLED` must be the direct URL whose hostname does not contain
+`-pooler`. Use a separate development branch rather than production; using the
+staging branch locally is acceptable only when a dedicated development branch
+is not available.
+
+If Neon credentials are rotated, replace both local values with the matching
+new URLs. The migration configuration adds `sslmode=verify-full` and
+`channel_binding=require`, but keeping those parameters in the stored URLs is
+also recommended.
 
 ## Required GitHub Secrets
 
@@ -78,8 +123,6 @@ Add these repository secrets in GitHub for CI builds and tests:
 
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
 - `CLERK_SECRET_KEY`
-- `DATABASE_URL`
-- `DATABASE_URL_UNPOOLED`
 
 Optional for future authenticated E2E tests:
 
@@ -94,6 +137,26 @@ Add these repository secrets in GitHub for Vercel deployment:
 - `VERCEL_PROJECT_ID`
 
 Vercel decides whether the deployment is Preview or Production from the CLI commands in the workflow. Do not use `staging` as a Vercel environment value; Vercel's standard targets here are `preview` and `production`.
+
+Use the existing GitHub environments named `Preview` and `Production`. Add a
+`DATABASE_URL_UNPOOLED` environment secret to each one using the direct Neon
+connection for the matching database branch:
+
+- `Preview` → staging Neon branch
+- `Production` → production Neon branch
+
+The URL must use:
+
+```text
+sslmode=verify-full&channel_binding=require
+```
+
+Restrict the `Preview` environment to the `staging` branch. Protect the
+`Production` environment with required reviewers and restrict it to the
+`master` branch. GitHub environment names are case-sensitive, so the workflow
+uses the existing names exactly. Environment scoping keeps migration
+credentials out of the normal CI, test, dependency-installation, and build
+steps.
 
 ## Vercel Setup
 
@@ -117,16 +180,19 @@ Set application runtime variables in the Vercel dashboard under Project Settings
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
 - `CLERK_SECRET_KEY`
 - `DATABASE_URL`
-- `DATABASE_URL_UNPOOLED`
 
 Assign staging or test Clerk keys to Vercel Preview, and production Clerk keys to Vercel Production. The GitHub deploy jobs run `vercel pull`, so Vercel provides those application variables to `vercel build`.
+
+Do not add `DATABASE_URL_UNPOOLED` to Vercel for this pipeline. The direct
+migration credential is read only from the protected GitHub environment during
+the migration step.
 
 ## Deployment Policy
 
 Recommended deployment behavior:
 
 - Pull requests run only the CI workflow.
-- `staging` branch deploys to a staging/preview environment after deploy workflow checks pass.
+- `staging` branch uses the GitHub `Preview` environment and deploys a Vercel Preview after deploy workflow checks pass.
 - `master` branch deploys to production after deploy workflow checks pass.
 - Production deployment should happen only after a reviewed merge to `master`.
 

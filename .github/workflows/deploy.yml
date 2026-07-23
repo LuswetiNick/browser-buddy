@@ -9,7 +9,7 @@ name: Deploy
 
 concurrency:
   group: deploy-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -116,6 +116,8 @@ jobs:
     timeout-minutes: 20
     needs: e2e
     if: github.ref == 'refs/heads/staging'
+    environment:
+      name: Preview
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
@@ -153,6 +155,17 @@ jobs:
       - name: Build Vercel preview artifacts
         run: vercel build --token="$VERCEL_TOKEN"
 
+      - name: Validate staging migration secret
+        env:
+          DATABASE_URL_UNPOOLED: ${{ secrets.DATABASE_URL_UNPOOLED }}
+        run: test -n "$DATABASE_URL_UNPOOLED" || (echo "Missing DATABASE_URL_UNPOOLED staging environment secret" && exit 1)
+
+      - name: Migrate staging database
+        env:
+          DATABASE_URL_UNPOOLED: ${{ secrets.DATABASE_URL_UNPOOLED }}
+          NODE_OPTIONS: --network-family-autoselection-attempt-timeout=2000
+        run: pnpm db:migrate
+
       - name: Deploy Vercel preview
         run: |
           vercel deploy --prebuilt --token="$VERCEL_TOKEN" > deployment-url.txt
@@ -165,7 +178,7 @@ jobs:
     needs: e2e
     if: github.ref == 'refs/heads/master'
     environment:
-      name: production
+      name: Production
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
@@ -202,6 +215,17 @@ jobs:
 
       - name: Build Vercel production artifacts
         run: vercel build --prod --token="$VERCEL_TOKEN"
+
+      - name: Validate production migration secret
+        env:
+          DATABASE_URL_UNPOOLED: ${{ secrets.DATABASE_URL_UNPOOLED }}
+        run: test -n "$DATABASE_URL_UNPOOLED" || (echo "Missing DATABASE_URL_UNPOOLED production environment secret" && exit 1)
+
+      - name: Migrate production database
+        env:
+          DATABASE_URL_UNPOOLED: ${{ secrets.DATABASE_URL_UNPOOLED }}
+          NODE_OPTIONS: --network-family-autoselection-attempt-timeout=2000
+        run: pnpm db:migrate
 
       - name: Deploy Vercel production
         run: |
